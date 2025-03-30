@@ -1,53 +1,50 @@
-import { NextResponse } from "next/server"
-import { PrismaClient } from "@prisma/client"
-import * as bcrypt from "bcrypt"
+// app/api/auth/register/route.ts
+import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    const { name, email, password, companyName } = body
-
-    // Validate input
-    if (!name || !email || !password || !companyName) {
-      return NextResponse.json(
-        { message: "Missing required fields" },
-        { status: 400 }
-      )
-    }
+    const { name, email, password, companyName } = await request.json();
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
-      where: {
-        email,
-      },
-    })
+      where: { email },
+    });
 
     if (existingUser) {
       return NextResponse.json(
-        { message: "User already exists" },
+        { message: 'User with this email already exists' },
         { status: 400 }
-      )
-    }
-
-    // Create or find company
-    let company = await prisma.company.findFirst({
-      where: {
-        name: companyName,
-      },
-    })
-
-    if (!company) {
-      company = await prisma.company.create({
-        data: {
-          name: companyName,
-        },
-      })
+      );
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10)
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create or find company
+    let company = await prisma.company.findFirst({
+      where: { name: companyName },
+    });
+
+    if (!company) {
+      // Generate a slug-like ID from company name
+      const companyId = companyName
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+
+      company = await prisma.company.create({
+        data: {
+          id: companyId,
+          name: companyName,
+          industry: 'Other', // Default industry
+        },
+      });
+    }
 
     // Create user
     const user = await prisma.user.create({
@@ -55,26 +52,23 @@ export async function POST(request: Request) {
         name,
         email,
         password: hashedPassword,
-        role: "company_user",
+        role: 'USER', // Default role for new users
         companyId: company.id,
       },
-    })
+      include: { company: true },
+    });
 
-    // Remove password from response
-    const { password: _, ...userWithoutPassword } = user
-
-    return NextResponse.json(
-      {
-        user: userWithoutPassword,
-        message: "User created successfully",
-      },
-      { status: 201 }
-    )
+    // Return user data (excluding password)
+    const { password: _, ...userData } = user;
+    
+    return NextResponse.json(userData);
   } catch (error) {
-    console.error("Registration error:", error)
+    console.error('Registration error:', error);
     return NextResponse.json(
-      { message: "An error occurred during registration" },
+      { message: 'An error occurred during registration' },
       { status: 500 }
-    )
+    );
+  } finally {
+    await prisma.$disconnect();
   }
 }

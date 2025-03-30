@@ -5,7 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { useAccessControl } from "@/components/access-control"
+import { signIn } from "next-auth/react"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
@@ -21,7 +21,6 @@ export default function SignInPage() {
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const { login } = useAccessControl()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -29,14 +28,23 @@ export default function SignInPage() {
     setIsLoading(true)
 
     try {
-      // Use the mock authentication system
-      await login(email, password)
+      const result = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
+      })
+
+      if (result?.error) {
+        setError("Invalid email or password")
+        setIsLoading(false)
+        return
+      }
 
       // Redirect to dashboard on success
       router.push("/dashboard")
       router.refresh()
-    } catch (error: any) {
-      setError("Invalid email or password")
+    } catch (error) {
+      setError("An error occurred. Please try again.")
       setIsLoading(false)
     }
   }
