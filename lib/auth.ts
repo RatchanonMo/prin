@@ -1,11 +1,12 @@
-// lib/auth.ts
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcrypt';
 
-const prisma = new PrismaClient();
+if (!process.env.NEXTAUTH_SECRET) {
+  throw new Error('NEXTAUTH_SECRET is not set in environment variables');
+}
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -26,15 +27,10 @@ export const authOptions: NextAuthOptions = {
           include: { company: true },
         });
 
-        if (!user) {
-          return null;
-        }
+        if (!user) return null;
 
         const passwordMatch = await bcrypt.compare(credentials.password, user.password);
-
-        if (!passwordMatch) {
-          return null;
-        }
+        if (!passwordMatch) return null;
 
         return {
           id: user.id,
@@ -42,7 +38,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           role: user.role,
           companyId: user.companyId,
-          company: user.company.name,
+          company: user.company?.name || null,
         };
       },
     }),
@@ -53,16 +49,18 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.role = user.role;
         token.companyId = user.companyId;
-        token.company = user.company;
+        token.company = user.company ?? null;
       }
       return token;
     },
     async session({ session, token }) {
-      if (token && session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as string;
-        session.user.companyId = token.companyId as string;
-        session.user.company = token.company as string;
+      if (session.user) {
+        session.user = {
+          id: token.id,
+          role: token.role,
+          companyId: token.companyId,
+          company: token.company,
+        };
       }
       return session;
     },

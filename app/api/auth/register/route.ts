@@ -41,7 +41,7 @@ export async function POST(request: Request) {
         data: {
           id: companyId,
           name: companyName,
-          industry: 'Other', // Default industry
+          // Default industry
         },
       });
     }

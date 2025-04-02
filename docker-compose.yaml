@@ -1,0 +1,11 @@
+services:
+  db:
+    image: postgres
+    container_name: prin-sustain-db_real
+    environment:
+      POSTGRES_DB: "prin_db_susatain"
+      POSTGRES_USER: "prin_user"
+      POSTGRES_PASSWORD: "123456"
+    ports:
+      - "6600:5432"
+    restart: unless-stopped
