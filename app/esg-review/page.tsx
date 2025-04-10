@@ -65,8 +65,12 @@ export default function ESGReviewPage() {
 
       // Filter submissions based on active tab
       filterSubmissions(data, activeTab, searchTerm, selectedType)
-    } catch (error: any) {
-      setError(error.message || "Failed to load submissions")
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message || "Failed to load submissions")
+      } else {
+        setError("Failed to load submissions")
+      }
     } finally {
       setIsLoading(false)
     }
@@ -137,8 +141,12 @@ export default function ESGReviewPage() {
 
       // Reload submissions
       await loadSubmissions()
-    } catch (error: any) {
-      setError(error.message || `Failed to ${action.toLowerCase()} submission`)
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message || `Failed to ${action.toLowerCase()} submission`)
+      } else {
+        setError(`Failed to ${action.toLowerCase()} submission`)
+      }
     } finally {
       setIsLoading(false)
     }
@@ -355,7 +363,7 @@ export default function ESGReviewPage() {
                                 size="sm"
                                 onClick={() => {
                                   // View submission details (in a real app, this would open a modal or navigate to a details page)
-                                  alert(`View details for submission ${submission.id}`)
+                                  router.push(`/esg-review/detail/${submission.id}`)
                                 }}
                               >
                                 View Details

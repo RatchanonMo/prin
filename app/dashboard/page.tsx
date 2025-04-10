@@ -46,8 +46,7 @@ interface Submission  {
 };
 
 export default function DashboardPage() {
-  const { data: session, status: sessionStatus } = useSession()
-  const [isLoading, setIsLoading] = useState(true)
+  const { status: sessionStatus } = useSession()
   const [error, setError] = useState("")
   const [scores, setScores] = useState<{
     environmentalScore: number | null
@@ -72,7 +71,6 @@ export default function DashboardPage() {
 
   // Load ESG scores from API
   const loadESGScores = async () => {
-    setIsLoading(true)
     setError("")
 
     try {
@@ -83,14 +81,12 @@ export default function DashboardPage() {
         governanceScore: data.governanceScore,
         overallScore: data.overallScore,
       })
-    } catch (error: any) {
+    } catch (error) {
       // If 404, it means no scores yet, which is fine
-      if (error.message !== "No ESG scores found") {
+      if (error instanceof Error && error.message !== "No ESG scores found") {
         setError(error.message || "Failed to load ESG scores")
       }
-    } finally {
-      setIsLoading(false)
-    }
+    } 
   }
 
   // Load submission status to determine which data is available
@@ -105,13 +101,12 @@ export default function DashboardPage() {
       const hasSocial = submissions.some((sub: Submission) => sub.type === "SOCIAL" && sub.status === "APPROVED")
 
       const hasGovernance = submissions.some((sub: Submission) => sub.type === "GOVERNANCE" && sub.status === "APPROVED")
-
       setDataStatus({
         ENVIRONMENTAL: hasEnvironmental,
         SOCIAL: hasSocial,
         GOVERNANCE: hasGovernance,
       })
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to load submission status:", error)
     }
   }
@@ -160,7 +155,7 @@ export default function DashboardPage() {
               title="Environmental"
               score={scores.environmentalScore || 0}
               color="environmental"
-              description="Your environmental score measures your company's impact on the natural world, including carbon emissions, energy usage, and waste management."
+              description="Your environmental score measures your company&apos;s impact on the natural world, including carbon emissions, energy usage, and waste management."
             />
             <ESGScoreCard
               title="Social"
@@ -172,7 +167,7 @@ export default function DashboardPage() {
               title="Governance"
               score={scores.governanceScore || 0}
               color="governance"
-              description="Your governance score assesses your company's leadership, policies, audits, internal controls, and transparency practices."
+              description="Your governance score assesses your company&apos;s leadership, policies, audits, internal controls, and transparency practices."
             />
           </div>
 
@@ -191,7 +186,7 @@ export default function DashboardPage() {
                       <Leaf className="h-6 w-6 text-[#14ae5c]" />
                       <CardTitle>Environmental Performance</CardTitle>
                     </div>
-                    <CardDescription>Tracking your company's impact on the natural world</CardDescription>
+                    <CardDescription>Tracking your company&apos;s impact on the natural world</CardDescription>
                   </CardHeader>
                   <CardContent className="pt-6">
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -270,7 +265,7 @@ export default function DashboardPage() {
                     <FileX className="h-12 w-12 text-muted-foreground mb-4" />
                     <h3 className="text-lg font-medium mb-2">No Environmental Data Submitted</h3>
                     <p className="text-muted-foreground max-w-md mb-6">
-                      You haven't submitted any environmental data yet. Start tracking your environmental impact by
+                      You haven&apos;t submitted any environmental data yet. Start tracking your environmental impact by
                       reporting your first data set.
                     </p>
                     <Button asChild>
@@ -371,7 +366,7 @@ export default function DashboardPage() {
                     <FileX className="h-12 w-12 text-muted-foreground mb-4" />
                     <h3 className="text-lg font-medium mb-2">No Social Data Submitted</h3>
                     <p className="text-muted-foreground max-w-md mb-6">
-                      You haven't submitted any social data yet. Start tracking your social impact by reporting your
+                      You haven&apos;t submitted any social data yet. Start tracking your social impact by reporting your
                       first data set.
                     </p>
                     <Button asChild>
@@ -472,7 +467,7 @@ export default function DashboardPage() {
                     <FileX className="h-12 w-12 text-muted-foreground mb-4" />
                     <h3 className="text-lg font-medium mb-2">No Governance Data Submitted</h3>
                     <p className="text-muted-foreground max-w-md mb-6">
-                      You haven't submitted any governance data yet. Start tracking your governance practices by
+                      You haven&apos;t submitted any governance data yet. Start tracking your governance practices by
                       reporting your first data set.
                     </p>
                     <Button asChild>

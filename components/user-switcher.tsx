@@ -16,7 +16,7 @@ import { UserCog } from "lucide-react"
 
 // This component is for demo purposes only to simulate different user roles
 export function UserSwitcher() {
-  const { user, switchUser } = useAccessControl() as any // Using any because switchUser is only for demo
+  const { user } = useAccessControl()  // Using any because switchUser is only for demo
   const [open, setOpen] = useState(false)
 
   const users = [
@@ -47,7 +47,8 @@ export function UserSwitcher() {
   ]
 
   const handleSwitchUser = (userId: string) => {
-    switchUser(userId)
+    // switchUser(userId)
+    console.log(userId)
     setOpen(false)
   }
 

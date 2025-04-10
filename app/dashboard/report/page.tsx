@@ -94,7 +94,7 @@ export default function ReportPage() {
   });
 
   // Check if user is admin
-  const isAdmin = session?.user?.role === "ADMIN";
+  const isAdmin = session?.user?.role === "admin";
 
   // Load submissions when component mounts
   useEffect(() => {
@@ -117,8 +117,8 @@ export default function ReportPage() {
       } else {
         setFormStatus("DRAFT");
       }
-    } catch (error: any) {
-      setError(error.message || "Failed to load submissions");
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Failed to load submissions");
     } finally {
       setIsLoading(false);
     }
@@ -173,10 +173,10 @@ export default function ReportPage() {
           riskAssessment: governanceData.riskAssessment || null,
         };
       }
-
+ 
       // Submit data to API
       await esg.submitData({
-        type: activeTab as any,
+        type: activeTab ,
         data: formData,
       });
 
@@ -220,8 +220,8 @@ export default function ReportPage() {
       setTimeout(() => {
         setShowSuccessAlert(false);
       }, 5000);
-    } catch (error: any) {
-      setError(error.message || "Failed to submit data");
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Failed to submit data");
     } finally {
       setIsSubmitting(false);
     }
@@ -242,13 +242,17 @@ export default function ReportPage() {
       await esg.reviewSubmission({
         submissionId: id,
         status: action,
-        rejectionReason: reason,
+        rejectionReason: reason || null,
       });
 
       // Reload submissions
       await loadSubmissions();
-    } catch (error: any) {
-      setError(error.message || `Failed to ${action.toLowerCase()} submission`);
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message || `Failed to ${action.toLowerCase()} submission`);
+      } else {
+        setError(`Failed to ${action.toLowerCase()} submission`);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -368,7 +372,7 @@ export default function ReportPage() {
               <AlertTitle>Submission Successful</AlertTitle>
               <AlertDescription>
                 Your ESG data has been submitted and is pending review by our
-                ESG team. You'll be notified once it's approved.
+                ESG team. You&apos;ll be notified once it&apos;s approved.
               </AlertDescription>
             </Alert>
           )}
@@ -539,7 +543,7 @@ export default function ReportPage() {
                     <CardTitle>Environmental Data</CardTitle>
                   </div>
                   <CardDescription>
-                    Report your company's impact on the natural world
+                    Report your company&apos;s impact on the natural world
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-6">

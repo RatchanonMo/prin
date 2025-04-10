@@ -6,7 +6,7 @@ import { authOptions } from "@/lib/auth";
 
 const prisma = new PrismaClient();
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 
@@ -23,8 +23,8 @@ export async function GET(request: Request) {
 
     // Check if user has access to this company's data
     if (
-      session.user.role !== "ADMIN" &&
-      session.user.role !== "ESG_TEAM" &&
+      session.user.role !== "admin" &&
+      session.user.role !== "esg_team" &&
       session.user.companyId !== companyId
     ) {
       return NextResponse.json(

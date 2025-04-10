@@ -29,6 +29,7 @@ interface AccessControlContextType {
   logout: () => void
   canApproveReports: boolean
   canViewCompanyData: (companyId: string) => boolean
+  
 }
 
 // Create context with default values
@@ -120,7 +121,7 @@ export function AccessControlProvider({ children }: { children: ReactNode }) {
   }
 
   // Login function (simulated)
-  const login = async (email: string, password: string) => {
+  const login = async (email: string) => {
     setIsLoading(true)
     try {
       // Find user by email (in a real app, this would be an API call)

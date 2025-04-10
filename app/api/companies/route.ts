@@ -18,7 +18,7 @@ export async function GET() {
     }
 
     // Only admin and ESG team can see all companies
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'ESG_TEAM') {
+    if (session.user.role !== 'admin' && session.user.role !== 'esg_team') {
       // Regular users can only see their own company
       const company = await prisma.company.findUnique({
         where: { id: session.user.companyId },

@@ -30,8 +30,8 @@ export default function ForgotPasswordPage() {
       await new Promise((resolve) => setTimeout(resolve, 1500))
 
       setIsSubmitted(true)
-    } catch (error: any) {
-      setError(error.message || "An error occurred. Please try again.")
+    } catch (error) {
+      setError((error instanceof Error ? error.message : "An error occurred. Please try again."))
     } finally {
       setIsSubmitting(false)
     }
@@ -51,7 +51,7 @@ export default function ForgotPasswordPage() {
               </div>
               <CardTitle className="text-2xl font-bold">Forgot Password</CardTitle>
               <CardDescription>
-                Enter your email address and we'll send you a link to reset your password
+                Enter your email address and we&apos;ll send you a link to reset your password
               </CardDescription>
             </CardHeader>
             {isSubmitted ? (
@@ -59,7 +59,7 @@ export default function ForgotPasswordPage() {
                 <Alert className="bg-green-50 border-green-200">
                   <CheckCircle className="h-4 w-4 text-green-600" />
                   <AlertDescription>
-                    If an account exists with the email <strong>{email}</strong>, we've sent password reset instructions
+                    If an account exists with the email <strong>{email}</strong>, we&apos;ve sent password reset instructions
                     to that address.
                   </AlertDescription>
                 </Alert>

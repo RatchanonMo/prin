@@ -1,9 +1,10 @@
-import { Navbar } from "@/components/navbar"
-import { Footer } from "@/components/footer"
-import { ESGScoreCard } from "@/components/esg-score-card"
-import { MetricCard } from "@/components/metric-card"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+"use client";
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
+import { ESGScoreCard } from "@/components/esg-score-card";
+import { MetricCard } from "@/components/metric-card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   BarChart3,
   Leaf,
@@ -16,11 +17,44 @@ import {
   TrendingDown,
   AlertTriangle,
   Info,
-} from "lucide-react"
-import Link from "next/link"
-import { TooltipHelper } from "@/components/tooltip-helper"
+} from "lucide-react";
+import Link from "next/link";
+import { TooltipHelper } from "@/components/tooltip-helper";
+import { esg } from "@/lib/api-client";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 
 export default function AnalyticsPage() {
+  const { status: sessionStatus } = useSession();
+
+  const [scores, setScores] = useState<{
+    environmentalScore: number | null;
+    socialScore: number | null;
+    governanceScore: number | null;
+    overallScore: number | null;
+  }>({
+    environmentalScore: null,
+    socialScore: null,
+    governanceScore: null,
+    overallScore: null,
+  });
+
+  useEffect(() => {
+    if (sessionStatus === "authenticated") {
+      loadESGScores();
+    }
+  }, [sessionStatus]);
+
+  // Load ESG scores from API
+  const loadESGScores = async () => {
+      const data = await esg.getScores();
+      setScores({
+        environmentalScore: data.environmentalScore,
+        socialScore: data.socialScore,
+        governanceScore: data.governanceScore,
+        overallScore: data.overallScore,
+      });
+  };
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
@@ -36,8 +70,12 @@ export default function AnalyticsPage() {
                   </Link>
                 </Button>
               </div>
-              <h1 className="text-3xl font-bold tracking-tight">ESG Analytics</h1>
-              <p className="text-muted-foreground">Comprehensive analysis of your ESG performance</p>
+              <h1 className="text-3xl font-bold tracking-tight">
+                ESG Analytics
+              </h1>
+              <p className="text-muted-foreground">
+                Comprehensive analysis of your ESG performance
+              </p>
             </div>
             <Button>
               <Download className="mr-2 h-4 w-4" />
@@ -51,9 +89,13 @@ export default function AnalyticsPage() {
               <CardContent className="p-6">
                 <div className="grid gap-6 md:grid-cols-4">
                   <div className="md:col-span-1">
-                    <h2 className="text-xl font-bold mb-2">Overall ESG Score</h2>
-                    <p className="text-muted-foreground mb-4">Your combined performance across all ESG categories</p>
-                    <div className="text-6xl font-bold text-primary">80</div>
+                    <h2 className="text-xl font-bold mb-2">
+                      Overall ESG Score
+                    </h2>
+                    <p className="text-muted-foreground mb-4">
+                      Your combined performance across all ESG categories
+                    </p>
+                    <div className="text-6xl font-bold text-primary">{scores.overallScore}</div>
                     <div className="flex items-center mt-2 text-green-500">
                       <ArrowUpRight className="h-4 w-4 mr-1" />
                       <span>+5 points from last quarter</span>
@@ -62,33 +104,39 @@ export default function AnalyticsPage() {
                     {/* ESG Rating */}
                     <div className="mt-4">
                       <div className="flex items-center gap-1">
-                        <span className="text-sm font-medium text-muted-foreground">ESG Rating:</span>
+                        <span className="text-sm font-medium text-muted-foreground">
+                          ESG Rating:
+                        </span>
                         <TooltipHelper text="ESG ratings range from CCC (lowest) to AAA (highest), similar to credit ratings. Your rating is based on your overall ESG performance compared to industry standards.">
                           <Info className="h-3 w-3 text-muted-foreground cursor-help" />
                         </TooltipHelper>
                       </div>
-                      <div className="text-3xl font-bold text-primary mt-1">AA</div>
-                      <p className="text-xs text-muted-foreground mt-1">Very Good Performance</p>
+                      <div className="text-3xl font-bold text-primary mt-1">
+                        AA
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Very Good Performance
+                      </p>
                     </div>
                   </div>
                   <div className="md:col-span-3 grid gap-4 grid-cols-3">
                     <ESGScoreCard
                       title="Environmental"
-                      score={70}
+                      score={scores.environmentalScore || 0}
                       color="environmental"
                       description="Your environmental score measures your company's impact on the natural world."
                       size="small"
                     />
                     <ESGScoreCard
                       title="Social"
-                      score={80}
+                      score={scores.socialScore || 0}
                       color="social"
                       description="Your social score evaluates how your company manages relationships with people."
                       size="small"
                     />
                     <ESGScoreCard
                       title="Governance"
-                      score={90}
+                      score={scores.governanceScore || 0}
                       color="governance"
                       description="Your governance score assesses your company's leadership and policies."
                       size="small"
@@ -118,7 +166,9 @@ export default function AnalyticsPage() {
                     </div>
                     <div className="absolute top-full left-[calc(83.3%)] transform -translate-x-1/2 mt-1">
                       <div className="w-0 h-0 border-l-8 border-r-8 border-b-8 border-l-transparent border-r-transparent border-b-gray-900"></div>
-                      <div className="bg-gray-900 text-white px-2 py-1 rounded text-xs">Your Rating</div>
+                      <div className="bg-gray-900 text-white px-2 py-1 rounded text-xs">
+                        Your Rating
+                      </div>
                     </div>
                   </div>
                   <div className="grid grid-cols-7 gap-2 text-xs text-center mt-8">
@@ -164,12 +214,19 @@ export default function AnalyticsPage() {
                 <div className="flex flex-col space-y-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-lg font-medium">Your Ranking Among GreenStart Clients</h3>
-                      <p className="text-sm text-muted-foreground mt-1">Based on overall ESG performance</p>
+                      <h3 className="text-lg font-medium">
+                        Your Ranking Among GreenStart Clients
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Based on overall ESG performance
+                      </p>
                     </div>
                     <div className="text-right">
                       <div className="text-3xl font-bold text-primary">
-                        12<span className="text-lg text-muted-foreground">/78</span>
+                        12
+                        <span className="text-lg text-muted-foreground">
+                          /78
+                        </span>
                       </div>
                       <p className="text-sm text-muted-foreground">Top 15%</p>
                     </div>
@@ -201,10 +258,16 @@ export default function AnalyticsPage() {
                           Environmental Ranking
                         </h4>
                         <div className="mt-2 flex items-baseline gap-1">
-                          <span className="text-2xl font-bold text-[#14ae5c]">18</span>
-                          <span className="text-sm text-muted-foreground">/78</span>
+                          <span className="text-2xl font-bold text-[#14ae5c]">
+                            18
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            /78
+                          </span>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">Top 23%</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Top 23%
+                        </p>
                       </CardContent>
                     </Card>
 
@@ -215,10 +278,16 @@ export default function AnalyticsPage() {
                           Social Ranking
                         </h4>
                         <div className="mt-2 flex items-baseline gap-1">
-                          <span className="text-2xl font-bold text-[#8000ff]">9</span>
-                          <span className="text-sm text-muted-foreground">/78</span>
+                          <span className="text-2xl font-bold text-[#8000ff]">
+                            9
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            /78
+                          </span>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">Top 12%</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Top 12%
+                        </p>
                       </CardContent>
                     </Card>
 
@@ -229,16 +298,24 @@ export default function AnalyticsPage() {
                           Governance Ranking
                         </h4>
                         <div className="mt-2 flex items-baseline gap-1">
-                          <span className="text-2xl font-bold text-[#ff8c00]">5</span>
-                          <span className="text-sm text-muted-foreground">/78</span>
+                          <span className="text-2xl font-bold text-[#ff8c00]">
+                            5
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            /78
+                          </span>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">Top 6%</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Top 6%
+                        </p>
                       </CardContent>
                     </Card>
                   </div>
 
                   <div className="bg-muted/30 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium mb-2">Industry Comparison</h4>
+                    <h4 className="text-sm font-medium mb-2">
+                      Industry Comparison
+                    </h4>
                     <div className="space-y-3">
                       <div>
                         <div className="flex justify-between items-center mb-1">
@@ -246,7 +323,10 @@ export default function AnalyticsPage() {
                           <span className="text-xs font-medium">AA (80%)</span>
                         </div>
                         <div className="w-full bg-muted rounded-full h-2">
-                          <div className="bg-primary h-2 rounded-full" style={{ width: "80%" }}></div>
+                          <div
+                            className="bg-primary h-2 rounded-full"
+                            style={{ width: "80%" }}
+                          ></div>
                         </div>
                       </div>
                       <div>
@@ -255,7 +335,10 @@ export default function AnalyticsPage() {
                           <span className="text-xs font-medium">BBB (65%)</span>
                         </div>
                         <div className="w-full bg-muted rounded-full h-2">
-                          <div className="bg-yellow-400 h-2 rounded-full" style={{ width: "65%" }}></div>
+                          <div
+                            className="bg-yellow-400 h-2 rounded-full"
+                            style={{ width: "65%" }}
+                          ></div>
                         </div>
                       </div>
                       <div>
@@ -264,7 +347,10 @@ export default function AnalyticsPage() {
                           <span className="text-xs font-medium">AAA (95%)</span>
                         </div>
                         <div className="w-full bg-muted rounded-full h-2">
-                          <div className="bg-green-600 h-2 rounded-full" style={{ width: "95%" }}></div>
+                          <div
+                            className="bg-green-600 h-2 rounded-full"
+                            style={{ width: "95%" }}
+                          ></div>
                         </div>
                       </div>
                     </div>
@@ -281,7 +367,9 @@ export default function AnalyticsPage() {
               <CardContent className="p-6">
                 <div className="h-[300px] flex items-center justify-center bg-muted/40 rounded-md">
                   <BarChart3 className="h-16 w-16 text-muted-foreground" />
-                  <span className="ml-2 text-muted-foreground">ESG Performance Trend Chart</span>
+                  <span className="ml-2 text-muted-foreground">
+                    ESG Performance Trend Chart
+                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -430,7 +518,9 @@ export default function AnalyticsPage() {
 
           {/* Insights and Recommendations */}
           <div className="mb-8">
-            <h2 className="text-xl font-bold mb-4">Insights & Recommendations</h2>
+            <h2 className="text-xl font-bold mb-4">
+              Insights & Recommendations
+            </h2>
             <div className="grid gap-4 md:grid-cols-3">
               <Card>
                 <CardHeader className="pb-2">
@@ -460,7 +550,9 @@ export default function AnalyticsPage() {
               <Card>
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">Areas for Improvement</CardTitle>
+                    <CardTitle className="text-lg">
+                      Areas for Improvement
+                    </CardTitle>
                     <TrendingDown className="h-5 w-5 text-red-500" />
                   </div>
                 </CardHeader>
@@ -516,40 +608,65 @@ export default function AnalyticsPage() {
               <CardContent className="p-6">
                 <div className="grid gap-6 md:grid-cols-2">
                   <div>
-                    <h3 className="text-lg font-medium mb-4">Your ESG Performance vs Industry Average</h3>
+                    <h3 className="text-lg font-medium mb-4">
+                      Your ESG Performance vs Industry Average
+                    </h3>
                     <div className="h-[250px] flex items-center justify-center bg-muted/40 rounded-md">
                       <BarChart3 className="h-12 w-12 text-muted-foreground" />
-                      <span className="ml-2 text-muted-foreground">Benchmark Comparison Chart</span>
+                      <span className="ml-2 text-muted-foreground">
+                        Benchmark Comparison Chart
+                      </span>
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-lg font-medium mb-4">Performance by Category</h3>
+                    <h3 className="text-lg font-medium mb-4">
+                      Performance by Category
+                    </h3>
                     <div className="space-y-4">
                       <div>
                         <div className="flex justify-between items-center mb-1">
-                          <span className="text-sm font-medium">Environmental</span>
-                          <span className="text-sm font-medium">70% vs 65% avg</span>
+                          <span className="text-sm font-medium">
+                            Environmental
+                          </span>
+                          <span className="text-sm font-medium">
+                            70% vs 65% avg
+                          </span>
                         </div>
                         <div className="w-full bg-muted rounded-full h-2.5">
-                          <div className="bg-[#14ae5c] h-2.5 rounded-full" style={{ width: "70%" }}></div>
+                          <div
+                            className="bg-[#14ae5c] h-2.5 rounded-full"
+                            style={{ width: "70%" }}
+                          ></div>
                         </div>
                       </div>
                       <div>
                         <div className="flex justify-between items-center mb-1">
                           <span className="text-sm font-medium">Social</span>
-                          <span className="text-sm font-medium">80% vs 72% avg</span>
+                          <span className="text-sm font-medium">
+                            80% vs 72% avg
+                          </span>
                         </div>
                         <div className="w-full bg-muted rounded-full h-2.5">
-                          <div className="bg-[#8000ff] h-2.5 rounded-full" style={{ width: "80%" }}></div>
+                          <div
+                            className="bg-[#8000ff] h-2.5 rounded-full"
+                            style={{ width: "80%" }}
+                          ></div>
                         </div>
                       </div>
                       <div>
                         <div className="flex justify-between items-center mb-1">
-                          <span className="text-sm font-medium">Governance</span>
-                          <span className="text-sm font-medium">90% vs 78% avg</span>
+                          <span className="text-sm font-medium">
+                            Governance
+                          </span>
+                          <span className="text-sm font-medium">
+                            90% vs 78% avg
+                          </span>
                         </div>
                         <div className="w-full bg-muted rounded-full h-2.5">
-                          <div className="bg-[#ff8c00] h-2.5 rounded-full" style={{ width: "90%" }}></div>
+                          <div
+                            className="bg-[#ff8c00] h-2.5 rounded-full"
+                            style={{ width: "90%" }}
+                          ></div>
                         </div>
                       </div>
                     </div>
@@ -562,6 +679,5 @@ export default function AnalyticsPage() {
       </main>
       <Footer />
     </div>
-  )
+  );
 }
-

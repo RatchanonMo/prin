@@ -44,7 +44,7 @@ export default function SignInPage() {
       router.push("/dashboard")
       router.refresh()
     } catch (error) {
-      setError("An error occurred. Please try again.")
+      setError("An error occurred. Please try again."+ error)
       setIsLoading(false)
     }
   }
@@ -123,7 +123,7 @@ export default function SignInPage() {
                   {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
                 </Button>
                 <div className="text-center text-sm">
-                  Don't have an account?{" "}
+                  Don&apos;t have an account?{" "}
                   <Link href="/auth/sign-up" className="text-primary hover:underline">
                     Sign up
                   </Link>

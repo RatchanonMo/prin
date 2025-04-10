@@ -1,57 +1,39 @@
+interface DataSubmission {
+  carbonEmissions?: number | null;
+  energyUsage?: number | null;
+  renewableEnergy?: number | null;
+  wasteRecycled?: number | null;
+  waterUsage?: number | null;
+  paperUsage?: number | null;
+  boardDiversity?: number | null;
+  ethicsViolations?: number | null;
+  policyCoverage?: number | null;
+  dataBreaches?: number | null;
+  complianceScore?: number | null;
+  riskAssessment?: string | null;
+  genderDiversity?: number | null;
+  employeeTurnover?: number | null;
+  trainingHours?: number | null;
+  payEquityRatio?: number | null;
+  communityInvestment?: number | null;
+  employeeSatisfaction?: number | null;
+}
+
 export const esg = {
-  getSubmissions: async (params?: { type?: string }) => {
+  getSubmissions: async (params?: { type?: string; id?: string }) => {
     const filteredSubmissions = await fetch("/api/esg/submissions", {
       method: "POST",
-      body: JSON.stringify(params),
+      body: JSON.stringify(params || {}),
     });
 
     const submissions = await filteredSubmissions.json();
-
-
-    //   const mockSubmissions: Submission[] = [
-    //     {
-    //       id: "1",
-    //       type: "ENVIRONMENTAL",
-    //       status: "PENDING",
-    //       submittedAt: new Date().toISOString(),
-    //       reviewedAt: null,
-    //       reviewerId: null,
-    //       reviewer: null,
-    //       rejectionReason: null,
-    //       companyId: "acme",
-    //       company: { name: "Acme Corp" },
-    //     },
-    //   ];
-    //   {
-    //     id: "2",
-    //     type: "SOCIAL",
-    //     status: "APPROVED",
-    //     submittedAt: new Date().toISOString(),
-    //     reviewedAt: new Date().toISOString(),
-    //     reviewerId: "reviewer1",
-    //     reviewer: { name: "Dr. Emma Chen" },
-    //     rejectionReason: null,
-    //     companyId: "acme",
-    //     company: { name: "Acme Corp" },
-    //   },
-    //   {
-    //     id: "3",
-    //     type: "GOVERNANCE",
-    //     status: "REJECTED",
-    //     submittedAt: new Date().toISOString(),
-    //     reviewedAt: new Date().toISOString(),
-    //     reviewerId: "reviewer2",
-    //     reviewer: { name: "Michael Rodriguez" },
-    //     rejectionReason: "Data is inaccurate",
-    //     companyId: "acme",
-    //     company: { name: "Acme Corp" },
-    //   },
-    // ];
-
     return submissions;
   },
 
-  submitData: async (data: any) => {
+  submitData: async (data: {
+    type: string;
+    data: DataSubmission;
+  }): Promise<void> => {
     // In a real application, this would send data to an API.
     await fetch("/api/esg/submit", {
       method: "POST",
@@ -60,9 +42,16 @@ export const esg = {
     return Promise.resolve();
   },
 
-  reviewSubmission: async (data: any) => {
+  reviewSubmission: async (data: {
+    submissionId: string;
+    status: string;
+    rejectionReason: string | null;
+  }): Promise<void> => {
     // In a real application, this would send data to an API.
-    console.log("Reviewing submission:", data);
+    await fetch("/api/esg/review", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
     return Promise.resolve();
   },
 
@@ -75,7 +64,12 @@ export const esg = {
 };
 
 export const auth = {
-  register: async (data: any) => {
+  register: async (data: {
+    name: string;
+    email: string;
+    password: string;
+    companyName: string;
+  }) => {
     // In a real application, this would send data to an API.
     await fetch("/api/auth/register", {
       method: "POST",

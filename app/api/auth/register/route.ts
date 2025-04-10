@@ -60,6 +60,7 @@ export async function POST(request: Request) {
 
     // Return user data (excluding password)
     const { password: _, ...userData } = user;
+    console.log(_)
     
     return NextResponse.json(userData);
   } catch (error) {

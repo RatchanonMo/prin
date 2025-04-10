@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
+import { calculateEnvironmentalScore, calculateGovernanceScore, calculateSocialScore } from '@/lib/calculateScore';
 
 const prisma = new PrismaClient();
 
@@ -18,7 +19,7 @@ export async function POST(request: Request) {
     }
 
     // Check if user is admin or ESG team
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'ESG_TEAM') {
+    if (session.user.role !== 'admin' && session.user.role !== 'esg_team') {
       return NextResponse.json(
         { message: 'Unauthorized. Only ESG team members can review submissions' },
         { status: 403 }
@@ -49,7 +50,7 @@ export async function POST(request: Request) {
       data: {
         status,
         rejectionReason: status === 'REJECTED' ? rejectionReason : null,
-        reviewedById: session.user.id,
+        reviewerId: session.user.id,
         reviewedAt: new Date(),
       },
     });
@@ -89,9 +90,9 @@ async function updateESGScores(companyId: string) {
 
     // Calculate scores (simplified example)
     // In a real application, you would have a more sophisticated scoring algorithm
-    const environmentalScore = environmentalSubmissions.length > 0 ? 70 : 0;
-    const socialScore = socialSubmissions.length > 0 ? 80 : 0;
-    const governanceScore = governanceSubmissions.length > 0 ? 90 : 0;
+    const environmentalScore = environmentalSubmissions.length > 0 ? calculateEnvironmentalScore(JSON.parse(environmentalSubmissions[0]?.data)) : 0;
+    const socialScore = socialSubmissions.length > 0 ? calculateSocialScore(JSON.parse(socialSubmissions[0]?.data)) : 0;
+    const governanceScore = governanceSubmissions.length > 0 ? calculateGovernanceScore(JSON.parse(governanceSubmissions[0]?.data)) : 0;
     
     // Calculate overall score
     let overallScore = 0;
@@ -122,7 +123,6 @@ async function updateESGScores(companyId: string) {
         socialScore,
         governanceScore,
         overallScore,
-        calculatedAt: new Date(),
       },
       create: {
         companyId,
@@ -130,7 +130,6 @@ async function updateESGScores(companyId: string) {
         socialScore,
         governanceScore,
         overallScore,
-        calculatedAt: new Date(),
       },
     });
   } catch (error) {

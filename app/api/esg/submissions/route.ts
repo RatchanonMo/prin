@@ -16,24 +16,22 @@ export async function POST(request: Request) {
         { status: 401 }
       );
     }
-    const { type } = await request.json();
+    const payload = await request.json();
     const companyId = session.user.companyId;
 
     // Build query filters
-    const filters: any = {};
+    const filters: { type?: string; id?: string; companyId?: string } = {};
     
-    if (type) {
-      filters.type = type;
+    if (payload.type) {
+      filters.type = payload.type;
     }
-    
+    if (payload.id) {
+      filters.id = payload.id;
+    }
     // If user is not admin or ESG team, restrict to their company
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'esg_team') {
-      filters.companyId = session.user.companyId;
-    } else if (companyId) {
-      // Admin or ESG team can filter by company
+    if (session.user.role !== 'admin' && session.user.role !== 'esg_team') {
       filters.companyId = companyId;
-    }
-
+    } 
     const submissions = await prisma.submission.findMany({
       where: filters,
       include: {
