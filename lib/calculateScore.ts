@@ -161,7 +161,6 @@ export function calculateGovernanceScore(data: GovernanceData): number {
     policyCoverage,
     dataBreaches,
     complianceScore,
-    riskAssessmentFrequency,
   } = data;
 
   const weights = ESG_WEIGHTS.governance.metrics;
