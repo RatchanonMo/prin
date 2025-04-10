@@ -184,7 +184,7 @@ export function calculateGovernanceScore(data: GovernanceData): number {
 
   // For risk assessment frequency (higher frequency is better)
   // Assuming frequency is number of assessments per year
-  const riskScore = Math.max(0, Math.min(100, riskAssessmentFrequency * 25)); // 4 per year = 100 points
+  const riskScore = Math.max(0, Math.min(100, 1 * 25)); // 4 per year = 100 points
 
   // Calculate weighted score
   return Math.round(
