@@ -38,7 +38,7 @@ export default function Home() {
               <div className="mx-auto lg:mx-0 relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg blur-3xl opacity-50"></div>
                 <img
-                  src="/placeholder.svg?height=550&width=550"
+                  src="https://media.discordapp.net/attachments/1359851407338901568/1359931876701241517/istockphoto-1802169428-612x612.jpg?ex=67f946c1&is=67f7f541&hm=d7c2056d6688618bbf66d8280698a61c43146dc042a0c13858058c842ba3e7e3&=&format=webp"
                   alt="Dashboard Preview"
                   width={550}
                   height={550}

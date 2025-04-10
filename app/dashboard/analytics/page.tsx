@@ -23,6 +23,7 @@ import { TooltipHelper } from "@/components/tooltip-helper";
 import { esg } from "@/lib/api-client";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import { getESGRating } from "@/lib/esg-rating";
 
 export default function AnalyticsPage() {
   const { status: sessionStatus } = useSession();
@@ -55,6 +56,8 @@ export default function AnalyticsPage() {
         overallScore: data.overallScore,
       });
   };
+
+  const rating = getESGRating(scores.overallScore || 0)
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
@@ -111,11 +114,11 @@ export default function AnalyticsPage() {
                           <Info className="h-3 w-3 text-muted-foreground cursor-help" />
                         </TooltipHelper>
                       </div>
-                      <div className="text-3xl font-bold text-primary mt-1">
-                        AA
+                      <div className={`text-3xl font-bold mt-1 ${rating.color}`}>
+                        {rating.rating}
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Very Good Performance
+                        {rating.description}
                       </p>
                     </div>
                   </div>
