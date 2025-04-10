@@ -229,7 +229,7 @@ export function Navbar() {
                       variant="destructive"
                       size="sm"
                       className="justify-start"
-                      onClick={() => signOut()}
+                      onClick={() => signOut({callbackUrl: "/", redirect: true})}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       Log out
